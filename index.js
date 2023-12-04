@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import express from "express";
 import path from "path";
 
@@ -6,7 +7,10 @@ const HOST  = "0.0.0.0";
 
 const app = express();
 
+app.use(cookieParser());
+
 var lista_usurarios = [];
+
 
 app.use(express.urlencoded({ extended: true }));
 app.post(`/processar`, (req,res) => {
@@ -348,9 +352,16 @@ app.get(`/lista`, (req, res) => {
 });
 
 app.get(`/`, (req,res) => {
+    const ultimoacesso = req.cookies.ultimoacesso || "Nunca foi acessado";
+    const data = new Date();
+    res.cookie("ultimoacesso", data.toLocaleString(), {
+        maxAge: 1000 * 60 * 60 * 24 * 30,
+        httpOnly: true
+    })
     app.use(express.static(path.join(process.cwd(),`src`)))
 
-    res.send(`<h1><a href = form.html>Clique Aqui</a></h1>`)
+    res.send(`<h1><a href = form.html>Clique Aqui</a></h1>
+    <h2>Ultimo vez que entrou foi em${ultimoacesso}</h2>`)
 })
 
 app.listen(PORTA, HOST, () => {
